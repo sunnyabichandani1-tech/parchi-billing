@@ -25,6 +25,10 @@ Parked on purpose. Review before the wider seller version.
 | Loyalty points | Not a dairy behaviour |
 | Returnable crates and cans count | Real need, but a screen of its own |
 | Standing order, the usual daily order | Decision pending |
+| Auto bill a party's calls without approval | For parties who order the same things daily, his call bills and prints with no check. Parked until the AI matching has run clean for a few weeks |
+| Also called, party nicknames | Removed from the form to keep it short. Useful later for voice billing and search |
+| Route or area, with delivery sequence | Removed from the form. Comes back with route wise bill printing for dispatch |
+| Old due on the party form | Removed from the form. Opening balance to be entered from the party ledger instead |
 
 ## Bill by voice, admin side
 
