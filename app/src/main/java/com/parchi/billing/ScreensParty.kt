@@ -60,8 +60,8 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun Parties(nav: Nav) {
-    val parties by Repo.dao.partiesFlow().collectAsState(initial = emptyList())
-    val bills by Repo.dao.billsFlow().collectAsState(initial = emptyList())
+    val parties by Repo.parties.collectAsState()
+    val bills by Repo.bills.collectAsState()
     var q by remember { mutableStateOf("") }
     var f by remember { mutableStateOf("all") }
     val dues = duesOf(parties, bills)
@@ -123,10 +123,10 @@ fun Parties(nav: Nav) {
 fun PartyDetail(nav: Nav, id: Long) {
     val ctx = LocalContext.current
     val scope = rememberCoroutineScope()
-    val parties by Repo.dao.partiesFlow().collectAsState(initial = emptyList())
-    val bills by Repo.dao.billsFlow().collectAsState(initial = emptyList())
-    val specials by Repo.dao.specialsFlow().collectAsState(initial = emptyList())
-    val products by Repo.dao.productsFlow().collectAsState(initial = emptyList())
+    val parties by Repo.parties.collectAsState()
+    val bills by Repo.bills.collectAsState()
+    val specials by Repo.specials.collectAsState()
+    val products by Repo.products.collectAsState()
     var amount by remember { mutableStateOf("") }
     val p = parties.find { it.id == id } ?: run { Header("Party", "", { nav.back() }); return }
     val mine = bills.filter { it.partyId == id }
@@ -186,7 +186,7 @@ fun PartyDetail(nav: Nav, id: Long) {
 fun PartyEdit(nav: Nav, id: Long, extra: String) {
     val ctx = LocalContext.current
     val scope = rememberCoroutineScope()
-    val products by Repo.dao.productsFlow().collectAsState(initial = emptyList())
+    val products by Repo.products.collectAsState()
     var name by remember { mutableStateOf("") }
     val phones = remember { mutableStateListOf<Pair<String, String>>() }
     var gst by remember { mutableStateOf(false) }
@@ -365,8 +365,8 @@ private fun PickRow(title: String, sub: String, onClick: () -> Unit) {
 
 @Composable
 fun Pending(nav: Nav) {
-    val parties by Repo.dao.partiesFlow().collectAsState(initial = emptyList())
-    val bills by Repo.dao.billsFlow().collectAsState(initial = emptyList())
+    val parties by Repo.parties.collectAsState()
+    val bills by Repo.bills.collectAsState()
     val ch by Repo.prefs.changes.collectAsState()
     var mode by remember { mutableStateOf("route") }
     val dues = duesOf(parties, bills).values.filter { it.due > 0 }
@@ -452,8 +452,8 @@ private fun RouteList(items: List<Due>, nav: Nav) {
 fun PendingParty(nav: Nav, id: Long) {
     val ctx = LocalContext.current
     val scope = rememberCoroutineScope()
-    val parties by Repo.dao.partiesFlow().collectAsState(initial = emptyList())
-    val bills by Repo.dao.billsFlow().collectAsState(initial = emptyList())
+    val parties by Repo.parties.collectAsState()
+    val bills by Repo.bills.collectAsState()
     var amount by remember { mutableStateOf("") }
     val p = parties.find { it.id == id } ?: run { Header("Party", "", { nav.back() }); return }
     val d = duesOf(listOf(p), bills)[p.id]

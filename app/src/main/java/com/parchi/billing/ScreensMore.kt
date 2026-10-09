@@ -49,7 +49,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun Products(nav: Nav) {
-    val products by Repo.dao.productsFlow().collectAsState(initial = emptyList())
+    val products by Repo.products.collectAsState()
     var q by remember { mutableStateOf("") }
     val s = q.trim().lowercase()
     val list = products.filter { p -> s.isEmpty() || p.name.lowercase().contains(s) || p.aliasList().any { it.contains(s) } }
@@ -294,6 +294,8 @@ fun Settings(nav: Nav) {
                 T("Language of the calls", 13, FontWeight.SemiBold, C.muted)
                 var lang by remember { mutableStateOf(p.s("callLang", "auto")) }
                 Seg(listOf("auto" to "Mixed", "hi" to "Hindi", "hinglish" to "Hinglish", "en" to "English"), lang, { lang = it; p.put("callLang", it) }, dark = true)
+                PrefCheck("Only read calls from saved parties", "onlyParties", true)
+                T("On: personal calls are never sent to Gemini. Off: calls from new numbers are read too, and you can add them as a party.", 12, color = C.muted)
                 Btn("Check for new calls now", { toast(ctx, "Checking"); scope.launch { Pipeline.scan(ctx) } }, Modifier.fillMaxWidth(), "sec", small = true)
             }
 
@@ -333,6 +335,8 @@ fun Settings(nav: Nav) {
             }
             Btn("What the app is doing  ›", { nav.go(Route("log")) }, Modifier.fillMaxWidth(), "sec", small = true)
             Btn("Products  ›", { nav.go(Route("products")) }, Modifier.fillMaxWidth(), "sec", small = true)
+            val ver = try { ctx.packageManager.getPackageInfo(ctx.packageName, 0).versionName } catch (e: Exception) { "" }
+            T("Parchi version $ver", 12, color = C.muted, modifier = Modifier.fillMaxWidth(), align = TextAlign.Center)
             Gap(10)
         }
     }
@@ -341,7 +345,7 @@ fun Settings(nav: Nav) {
 @Composable
 fun PrintCfg(nav: Nav) {
     val ch by Repo.prefs.changes.collectAsState()
-    val bills by Repo.dao.billsFlow().collectAsState(initial = emptyList())
+    val bills by Repo.bills.collectAsState()
     var lines by remember { mutableStateOf<List<PLine>>(emptyList()) }
     val sample = bills.firstOrNull { !it.isCancelled() }
     LaunchedEffect(ch, sample?.id) { lines = sample?.let { Printer.linesFor(it.id) } ?: emptyList() }

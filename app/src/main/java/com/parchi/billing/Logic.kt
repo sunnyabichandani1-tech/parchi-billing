@@ -5,7 +5,13 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.room.withTransaction
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.text.NumberFormat
 import java.time.LocalDate
@@ -146,6 +152,15 @@ object Repo {
     val log = MutableStateFlow<List<String>>(emptyList())
     val printerState = MutableStateFlow("")
     val wake = MutableSharedFlow<Unit>(extraBufferCapacity = 4)
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
+    /* live lists kept in memory, so every screen reads the same copy */
+    val bills: StateFlow<List<Bill>> by lazy { dao.billsFlow().stateIn(scope, SharingStarted.Eagerly, emptyList()) }
+    val parties: StateFlow<List<Party>> by lazy { dao.partiesFlow().stateIn(scope, SharingStarted.Eagerly, emptyList()) }
+    val products: StateFlow<List<Product>> by lazy { dao.productsFlow().stateIn(scope, SharingStarted.Eagerly, emptyList()) }
+    val orders: StateFlow<List<CallOrder>> by lazy { dao.ordersFlow().stateIn(scope, SharingStarted.Eagerly, emptyList()) }
+    val specials: StateFlow<List<Special>> by lazy { dao.specialsFlow().stateIn(scope, SharingStarted.Eagerly, emptyList()) }
+    val queue: StateFlow<Int> by lazy { dao.queueCount().stateIn(scope, SharingStarted.Eagerly, 0) }
 
     fun init(c: Context) {
         if (::db.isInitialized) return

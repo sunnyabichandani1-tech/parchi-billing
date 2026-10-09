@@ -292,6 +292,10 @@ Reply with JSON only, in this shape:
             if (party == null) party = parties.firstOrNull { p -> p.name.length >= 3 && o.fileName.lowercase().contains(p.name.lowercase()) }
             o = o.copy(secs = secs, phone = phone ?: "", partyId = party?.id, status = "reading", error = "")
             Repo.dao.updateOrder(o)
+            if (party == null && Repo.prefs.b("onlyParties", true)) {
+                Repo.dao.updateOrder(o.copy(status = "skipped"))
+                return
+            }
             if (Repo.prefs.s("geminiKey").isBlank()) { fail(o, "Add your Gemini key in Settings, then tap Try again"); return }
             val bytes = c.contentResolver.openInputStream(uri)?.use { it.readBytes() }
             if (bytes == null) { fail(o, "Could not open the recording"); return }

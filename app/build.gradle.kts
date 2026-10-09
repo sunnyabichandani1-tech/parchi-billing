@@ -9,18 +9,32 @@ android {
     namespace = "com.parchi.billing"
     compileSdk = 35
 
+    val run = (System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInt()
     defaultConfig {
         applicationId = "com.parchi.billing"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = run
+        versionName = "1.0.$run"
+    }
+
+    // One fixed key, so every new test build installs over the old one and keeps the data.
+    signingConfigs {
+        create("parchi") {
+            storeFile = file("parchi-debug.jks")
+            storePassword = "android"
+            keyAlias = "parchi"
+            keyPassword = "android"
+        }
     }
 
     buildTypes {
+        debug {
+            signingConfig = signingConfigs.getByName("parchi")
+        }
         release {
             isMinifyEnabled = false
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("parchi")
         }
     }
 

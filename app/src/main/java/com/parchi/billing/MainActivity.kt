@@ -128,7 +128,7 @@ class Nav {
 fun App() {
     val nav = remember { Nav() }
     BackHandler(enabled = nav.stack.size > 1) { nav.back() }
-    val queue by Repo.dao.queueCount().collectAsState(initial = 0)
+    val queue by Repo.queue.collectAsState()
     val pstate by Repo.printerState.collectAsState()
     val r = nav.top
     Column(Modifier.fillMaxSize().background(C.bg).systemBarsPadding().imePadding()) {

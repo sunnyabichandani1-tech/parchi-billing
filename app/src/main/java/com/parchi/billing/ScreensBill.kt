@@ -63,10 +63,10 @@ import java.util.Locale
 
 @Composable
 fun Home(nav: Nav) {
-    val bills by Repo.dao.billsFlow().collectAsState(initial = emptyList())
-    val parties by Repo.dao.partiesFlow().collectAsState(initial = emptyList())
-    val orders by Repo.dao.ordersFlow().collectAsState(initial = emptyList())
-    val products by Repo.dao.productsFlow().collectAsState(initial = emptyList())
+    val bills by Repo.bills.collectAsState()
+    val parties by Repo.parties.collectAsState()
+    val orders by Repo.orders.collectAsState()
+    val products by Repo.products.collectAsState()
     val ch by Repo.prefs.changes.collectAsState()
     val t = today()
     val todays = bills.filter { it.iso == t && !it.isCancelled() }
@@ -145,9 +145,9 @@ private fun HomeRow(title: String, sub: String, badge: Int, onClick: () -> Unit)
 fun NewBill(nav: Nav, editId: Long) {
     val ctx = LocalContext.current
     val scope = rememberCoroutineScope()
-    val parties by Repo.dao.partiesFlow().collectAsState(initial = emptyList())
-    val bills by Repo.dao.billsFlow().collectAsState(initial = emptyList())
-    val products by Repo.dao.productsFlow().collectAsState(initial = emptyList())
+    val parties by Repo.parties.collectAsState()
+    val bills by Repo.bills.collectAsState()
+    val products by Repo.products.collectAsState()
     var partyId by remember { mutableStateOf(0L) }
     var iso by remember { mutableStateOf(today()) }
     var mode by remember { mutableStateOf("credit") }
@@ -425,8 +425,8 @@ fun BillRow(b: Bill, partyName: String, nav: Nav) {
 
 @Composable
 fun TodayBills(nav: Nav) {
-    val bills by Repo.dao.billsFlow().collectAsState(initial = emptyList())
-    val parties by Repo.dao.partiesFlow().collectAsState(initial = emptyList())
+    val bills by Repo.bills.collectAsState()
+    val parties by Repo.parties.collectAsState()
     var f by remember { mutableStateOf("all") }
     val t = today()
     val all = bills.filter { it.iso == t }
@@ -456,9 +456,9 @@ fun TodayBills(nav: Nav) {
 fun BillView(nav: Nav, id: Long) {
     val ctx = LocalContext.current
     val scope = rememberCoroutineScope()
-    val b by Repo.dao.billFlow(id).collectAsState(initial = null)
-    val items by Repo.dao.itemsFlow(id).collectAsState(initial = emptyList())
-    val parties by Repo.dao.partiesFlow().collectAsState(initial = emptyList())
+    val b by remember(id) { Repo.dao.billFlow(id) }.collectAsState(initial = null)
+    val items by remember(id) { Repo.dao.itemsFlow(id) }.collectAsState(initial = emptyList())
+    val parties by Repo.parties.collectAsState()
     val ch by Repo.prefs.changes.collectAsState()
     var lines by remember { mutableStateOf<List<PLine>>(emptyList()) }
     var armed by remember { mutableStateOf(false) }
@@ -502,17 +502,17 @@ fun BillView(nav: Nav, id: Long) {
 fun AutoBills(nav: Nav) {
     val ctx = LocalContext.current
     val scope = rememberCoroutineScope()
-    val orders by Repo.dao.ordersFlow().collectAsState(initial = emptyList())
-    val bills by Repo.dao.billsFlow().collectAsState(initial = emptyList())
-    val parties by Repo.dao.partiesFlow().collectAsState(initial = emptyList())
-    val products by Repo.dao.productsFlow().collectAsState(initial = emptyList())
+    val orders by Repo.orders.collectAsState()
+    val bills by Repo.bills.collectAsState()
+    val parties by Repo.parties.collectAsState()
+    val products by Repo.products.collectAsState()
     var f by remember { mutableStateOf("all") }
     var armed by remember { mutableStateOf(-1L) }
     val byBill = bills.associateBy { it.id }
     val names = products.associateBy { it.id }
     fun billOf(o: CallOrder) = o.billId?.let { byBill[it] }
     val preds: Map<String, (CallOrder) -> Boolean> = mapOf(
-        "all" to { _ -> true },
+        "all" to { o -> o.status != "skipped" },
         "check" to { o -> o.status == "check" || o.status == "noparty" || o.status == "error" },
         "deliver" to { o -> billOf(o)?.let { !it.isCancelled() && !it.delivered } ?: false },
         "delivered" to { o -> billOf(o)?.let { !it.isCancelled() && it.delivered } ?: false },
@@ -605,9 +605,9 @@ fun AutoBills(nav: Nav) {
 fun Approve(nav: Nav, id: Long) {
     val ctx = LocalContext.current
     val scope = rememberCoroutineScope()
-    val o by Repo.dao.orderFlow(id).collectAsState(initial = null)
-    val products by Repo.dao.productsFlow().collectAsState(initial = emptyList())
-    val parties by Repo.dao.partiesFlow().collectAsState(initial = emptyList())
+    val o by remember(id) { Repo.dao.orderFlow(id) }.collectAsState(initial = null)
+    val products by Repo.products.collectAsState()
+    val parties by Repo.parties.collectAsState()
     val items = remember { mutableStateListOf<OItem>() }
     val qtys = remember { mutableStateListOf<String>() }
     var iso by remember { mutableStateOf(today()) }
