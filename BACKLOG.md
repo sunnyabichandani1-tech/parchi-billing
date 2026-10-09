@@ -51,4 +51,5 @@ Notes for when we build it: one mic button that stays on every screen, the speec
 | Outbound calling, agent calls the customer for his order | From the dairy agent vision, after inbound works |
 | Follow up reminder for customers who have not called | Same, after inbound works |
 | WhatsApp approvals | Needs the paid business API, Telegram covers it for now |
+| Live reports in Google Sheets | Several reports updated in real time on a Google Sheet. To be scoped in the reporting phase |
 | Play Store release | Blocked by SMS and all files access rules, sideload only |
