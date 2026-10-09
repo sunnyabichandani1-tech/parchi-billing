@@ -1,7 +1,12 @@
 name: Build APK
 
 on:
+  push:
+    branches: [ build ]
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   apk:
@@ -21,11 +26,22 @@ jobs:
           gradle-version: '8.11.1'
 
       - name: Build debug APK
-        run: gradle assembleDebug --no-daemon
+        run: gradle assembleDebug --no-daemon --stacktrace
+
+      - name: Name the APK
+        run: cp app/build/outputs/apk/debug/app-debug.apk parchi-${{ github.run_number }}.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: parchi-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: parchi-${{ github.run_number }}.apk
           if-no-files-found: error
+
+      - name: Publish a download link
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: Parchi test build ${{ github.run_number }}
+          prerelease: true
+          files: parchi-${{ github.run_number }}.apk
